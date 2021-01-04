@@ -10,7 +10,7 @@
 
 Bird = Class{}
 
-local GRAVITY = 20
+GRAVITY = 20
 
 function Bird:init()
     self.image = love.graphics.newImage('bird.png')
@@ -42,6 +42,7 @@ function Bird:collides(pipe)
 end
 
 function Bird:update(dt)
+
     self.dy = self.dy + GRAVITY * dt
 
     -- burst of anti-gravity when space or left mouse are pressed
@@ -51,6 +52,7 @@ function Bird:update(dt)
     end
 
     self.y = self.y + self.dy
+    
 end
 
 function Bird:render()

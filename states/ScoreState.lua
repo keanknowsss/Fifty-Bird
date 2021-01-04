@@ -45,7 +45,6 @@ function ScoreState:render()
         love.graphics.draw(gold,VIRTUAL_WIDTH/2-22 , VIRTUAL_HEIGHT/2-26)
     elseif self.score < 5 then
         love.graphics.draw(sad, VIRTUAL_WIDTH/2-22 , VIRTUAL_HEIGHT/2-26)
-
     end
 
     love.graphics.printf('Press Enter to Play Again!', 0, 190, VIRTUAL_WIDTH, 'center')
