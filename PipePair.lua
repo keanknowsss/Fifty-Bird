@@ -10,8 +10,8 @@
 
 PipePair = Class{}
 
--- size of the gap between pipes
-local GAP_HEIGHT = 90
+-- initializes the size of the gap between pipes
+GAP_HEIGHT = math.random(75, 110)
 
 function PipePair:init(y)
     -- flag to hold whether this pair has been scored (jumped through)
@@ -36,6 +36,7 @@ end
 function PipePair:update(dt)
     -- remove the pipe from the scene if it's beyond the left edge of the screen,
     -- else move it from right to left
+
     if self.x > -PIPE_WIDTH then
         self.x = self.x - PIPE_SPEED * dt
         self.pipes['lower'].x = self.x

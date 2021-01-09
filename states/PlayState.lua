@@ -17,11 +17,14 @@ PIPE_HEIGHT = 288
 BIRD_WIDTH = 38
 BIRD_HEIGHT = 24
 
+local spacing = 0
+
 function PlayState:init()
     self.bird = Bird()
     self.pipePairs = {}
     self.timer = 0
     self.score = 0
+    
 
     -- initialize our last recorded Y value for a gap placement to base other gaps off of
     self.lastY = -PIPE_HEIGHT + math.random(80) + 20
@@ -34,8 +37,10 @@ function PlayState:update(dt)
 
         if playStatus == 'play' then
             playStatus = 'paused'
+            sounds['music']:pause()
         elseif playStatus == 'paused' then
             playStatus = 'play'
+            sounds['music']:play()
         end
     end
 
@@ -54,25 +59,81 @@ function PlayState:update(dt)
         GRAVITY = 20
         GROUND_SCROLL_SPEED = 60
         BACKGROUND_SCROLL_SPEED = 30
+        
+        -- random size of the gap between pipes
+        GAP_HEIGHT = math.random(75, 110)
 
         -- update timer for pipe spawning
         self.timer = self.timer + dt
 
-        -- spawn a new pipe pair every second and a half
-        if self.timer > 2 then
-            -- modify the last Y coordinate we placed so pipe gaps aren't too far apart
-            -- no higher than 10 pixels below the top edge of the screen,
-            -- and no lower than a gap length (90 pixels) from the bottom
-            local y = math.max(-PIPE_HEIGHT + 10, 
-                math.min(self.lastY + math.random(-20, 20), VIRTUAL_HEIGHT - 90 - PIPE_HEIGHT))
-            self.lastY = y
+        -- not in specification(but is needed to make game more challenging :D)
+        -- sets up the spacing from last pipe to the next
+        -- the purpose of this is to make to make the game more challenging
+        -- making the pipe allignment a little more subtle
+        spacing = math.random(2) == 1 and math.random(-35, -10) or math.random(10, 35)
 
-            -- add a new pipe pair at the end of the screen at our new Y
-            table.insert(self.pipePairs, PipePair(y))
+        
+        --spawns the pipe at the interval depending on the current score
+        --being compared to a number from 7 to 10 so that everytime the user play
+        --they wont be able to notice which part of the game will become harder,
+        --slightly offset to the score in the medal given
+        if self.score <= math.random(7, 10) then
+            -- spawn a new pipe pair from a random time from 4.5  to 5.7 seconds 
+            if self.timer > math.random(4.6, 5.7) then
+                -- modify the last Y coordinate we placed so pipe gaps aren't too far apart
+                -- no higher than 10 pixels below the top edge of the screen,
+                -- and no lower than a gap length (90 pixels) from the bottom
+                -- change -90 from original to -125 to make the latter's bottom pipe more visible
+                local y = math.max(-PIPE_HEIGHT + 10, 
+                    math.min(self.lastY + spacing, VIRTUAL_HEIGHT - 125 - PIPE_HEIGHT))
+                self.lastY = y
 
-            -- reset timer
-            self.timer = 0
+                -- add a new pipe pair at the end of the screen at our new Y
+                table.insert(self.pipePairs, PipePair(y))
+
+                -- reset timer
+                self.timer = 0
+            end
+
+        elseif self.score <= math.random(17,21) then
+            -- spawn a new pipe pair every second and a half
+            if self.timer > math.random(3.5, 4.5) then
+                -- modify the last Y coordinate we placed so pipe gaps aren't too far apart
+                -- no higher than 10 pixels below the top edge of the screen,
+                -- and no lower than a gap length (90 pixels) from the bottom
+                -- change -90 from original to -125 to make the latter's bottom pipe more visible
+                local y = math.max(-PIPE_HEIGHT + 10, 
+                    math.min(self.lastY + spacing, VIRTUAL_HEIGHT - 135 - PIPE_HEIGHT))
+                self.lastY = y
+
+                -- add a new pipe pair at the end of the screen at our new Y
+                table.insert(self.pipePairs, PipePair(y))
+
+                -- reset timer
+                self.timer = 0
+            end
+
+        -- will continue until the player loses but the interval will still be randomized but not a lot 
+        else
+            -- spawn a new pipe pair every second and a half
+            if self.timer > math.random(2.4, 3.5) then
+                -- modify the last Y coordinate we placed so pipe gaps aren't too far apart
+                -- no higher than 10 pixels below the top edge of the screen,
+                -- and no lower than a gap length (90 pixels) from the bottom
+                -- change -90 from original to -120 to make the latter's bottom pipe more visible
+                local y = math.max(-PIPE_HEIGHT + 10, 
+                    math.min(self.lastY + spacing, VIRTUAL_HEIGHT - 130 - PIPE_HEIGHT))
+                self.lastY = y
+
+                -- add a new pipe pair at the end of the screen at our new Y
+                table.insert(self.pipePairs, PipePair(y))
+
+                -- reset timer
+                self.timer = 0
+            end
         end
+
+        
 
         -- for every pair of pipes..
         for k, pair in pairs(self.pipePairs) do
@@ -132,6 +193,7 @@ function PlayState:update(dt)
 end
 
 function PlayState:render()
+    
     for k, pair in pairs(self.pipePairs) do
         pair:render()
     end
