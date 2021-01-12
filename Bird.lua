@@ -47,9 +47,17 @@ function Bird:update(dt)
 
     -- burst of anti-gravity when space or left mouse are pressed
     if love.keyboard.wasPressed('space') or love.mouse.wasPressed(1) then
-        self.dy = -5
+        
         sounds['jump']:play()
+
+        if self.y < -self.height - 80 then
+            self.dy = 0
+        else
+            self.dy = -5
+        end
     end
+
+    
 
     self.y = self.y + self.dy
     

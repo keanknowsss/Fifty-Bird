@@ -26,42 +26,73 @@ function PlayState:init()
     self.score = 0
     
 
+    --sets the constant for the timer after the pause mini state
+    -- the timer is a little faster than the countdown before playstate
+    self.countDown = 3
+    self.countDownTimer = 0
+    self.COUNTDOWNTIME = 0.6
+
     -- initialize our last recorded Y value for a gap placement to base other gaps off of
-    self.lastY = -PIPE_HEIGHT + math.random(80) + 20
+    self.lastY = -PIPE_HEIGHT + math.random(80) + 40
 end
 
 function PlayState:update(dt)
 
+    --sets the states in playstate
     if love.keyboard.wasPressed('p') then
-        sounds['pause']:play()
 
         if playStatus == 'play' then
+            sounds['pause']:play()
             playStatus = 'paused'
             sounds['music']:pause()
         elseif playStatus == 'paused' then
-            playStatus = 'play'
-            sounds['music']:play()
+            sounds['pause']:play()
+            playStatus = 'resuming'
         end
     end
 
-
+    -- bird, pipes and the environment stops from moving
     if playStatus == 'paused' then
         PIPE_SPEED = 0
         GRAVITY = 0
         GROUND_SCROLL_SPEED = 0
         BACKGROUND_SCROLL_SPEED = 0
+    end
 
+    -- countdown after the pause state
+    -- gives the player time to set pace after pausing
+    if playStatus == 'resuming' then
+        PIPE_SPEED = 0
+        GRAVITY = 0
+        GROUND_SCROLL_SPEED = 0
+        BACKGROUND_SCROLL_SPEED = 0
+
+        self.countDownTimer = self.countDownTimer + dt
+
+        if self.countDownTimer > self.COUNTDOWNTIME then
+            self.countDownTimer = self.countDownTimer % self.COUNTDOWNTIME
+            self.countDown = self.countDown - 1
+
+            if self.countDown == 0 then
+                playStatus = 'play'
+                sounds['music']:play()
+           end
+        end
     end
 
 
+    -- only executes if playstate is in play State
     if playStatus == 'play' then
+        self.countDown = 3
+        self.countDownTimer = 0
+
         PIPE_SPEED = 60
         GRAVITY = 20
         GROUND_SCROLL_SPEED = 60
         BACKGROUND_SCROLL_SPEED = 30
         
         -- random size of the gap between pipes
-        GAP_HEIGHT = math.random(75, 110)
+        GAP_HEIGHT = math.random(80, 100)
 
         -- update timer for pipe spawning
         self.timer = self.timer + dt
@@ -187,13 +218,14 @@ function PlayState:update(dt)
                 score = self.score
             })
         end
-    end
-
-    
+    end    
 end
 
 function PlayState:render()
     
+   
+
+
     for k, pair in pairs(self.pipePairs) do
         pair:render()
     end
@@ -202,6 +234,16 @@ function PlayState:render()
     love.graphics.print('Score: ' .. tostring(self.score), 8, 8)
 
     self.bird:render()
+    
+    if playStatus == 'paused' then
+        love.graphics.setFont(hugeFont)
+        love.graphics.printf('ll', 0, 120, VIRTUAL_WIDTH, 'center')
+    end
+
+    if playStatus == 'resuming' then
+        love.graphics.setFont(hugeFont)
+        love.graphics.printf(tostring(self.countDown), 0, 120, VIRTUAL_WIDTH, 'center')
+    end
 end
 
 --[[
